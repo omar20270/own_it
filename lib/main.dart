@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:own_it/core/theme/app_thema.dart';
+import 'package:own_it/features/checkin/presentation/pages/checkin_page.dart';
 import 'package:own_it/firebase_options.dart';
 
 import 'core/constants/app_constants.dart';
@@ -26,7 +27,7 @@ class OwnItApp extends StatelessWidget {
       initialRoute: AppRoutes.setup,
       routes: {
         AppRoutes.setup: (_) => const SetupPage(),
-        // AppRoutes.checkin: (_) => const CheckinPage(),  // add later
+        AppRoutes.checkin: (_) => const CheckinPage(),
         // AppRoutes.result:  (_) => const ResultPage(),   // add later
       },
     );

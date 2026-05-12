@@ -36,7 +36,7 @@ class AppTheme {
     scaffoldBackgroundColor: AppColors.background,
     colorScheme: ColorScheme.fromSeed(
       seedColor: AppColors.primary,
-      background: AppColors.background,
+      surface: AppColors.background,
     ),
     fontFamily: 'Lato',
     textTheme: const TextTheme(

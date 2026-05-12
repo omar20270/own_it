@@ -106,10 +106,9 @@ class SetupPage extends ConsumerWidget {
                                     );
                                 // navigate to checkin (use SnackBar for now)
                                 if (context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text('Setup saved! ✅'),
-                                    ),
+                                  Navigator.pushNamed(
+                                    context,
+                                    AppRoutes.checkin,
                                   );
                                 }
                               } catch (e) {
@@ -166,7 +165,7 @@ class _SetupCard extends StatelessWidget {
         border: Border.all(color: AppColors.border),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
