@@ -12,8 +12,8 @@ class SetupPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final goal = ref.watch(goalProvider);
     final selectedHabit = ref.watch(selectedHabitProvider);
+
     final isValid = ref.watch(setupValidProvider);
 
     return Scaffold(
@@ -84,8 +84,17 @@ class SetupPage extends ConsumerWidget {
                       }).toList(),
                     ),
 
-                    const SizedBox(height: 36),
+                    const SizedBox(height: 14),
 
+                    const SizedBox(height: 14),
+
+                    _CustomDistractionField(
+                      onChanged: (value) {
+                        ref.read(selectedHabitProvider.notifier).state =
+                            value.trim().isEmpty ? null : value.trim();
+                      },
+                    ),
+                    const SizedBox(height: 14),
                     // CTA Button
                     _CtaButton(
                       isEnabled: isValid,
@@ -191,6 +200,7 @@ class _SectionLabel extends StatelessWidget {
 
 class _GoalTextField extends StatelessWidget {
   final ValueChanged<String> onChanged;
+
   const _GoalTextField({required this.onChanged});
 
   @override
@@ -221,6 +231,32 @@ class _GoalTextField extends StatelessWidget {
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+        ),
+      ),
+    );
+  }
+}
+
+class _CustomDistractionField extends StatelessWidget {
+  final ValueChanged<String> onChanged;
+
+  const _CustomDistractionField({required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      onChanged: onChanged,
+      decoration: InputDecoration(
+        hintText: 'e.g. Overthinking, gaming, social media',
+        filled: true,
+        fillColor: const Color(0xFFF1EFE8),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 15,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: Color(0xFFD8D6CF)),
         ),
       ),
     );

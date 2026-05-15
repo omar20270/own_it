@@ -34,4 +34,5 @@ class AppRoutes {
   static const setup = '/';
   static const checkin = '/checkin';
   static const result = '/result';
+  static const history = '/history';
 }

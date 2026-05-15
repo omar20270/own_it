@@ -57,3 +57,9 @@ final checkinAnswersProvider =
 
 // Saving state
 final checkinSavingProvider = StateProvider<bool>((ref) => false);
+// Provider that loads all 21 days of checkins
+final allCheckinsProvider = FutureProvider<List<Map<String, dynamic>>>((
+  ref,
+) async {
+  return ref.read(checkinRepositoryProvider).getAllCheckins();
+});

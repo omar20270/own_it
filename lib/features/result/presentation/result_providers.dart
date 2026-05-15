@@ -5,7 +5,7 @@ final resultRepositoryProvider = Provider<ResultRepository>((ref) {
   return ResultRepository();
 });
 
-final allCheckinsProvider = FutureProvider<List<Map<String, dynamic>>>((
+final resultAllCheckinsProvider = FutureProvider<List<Map<String, dynamic>>>((
   ref,
 ) async {
   return ref.read(resultRepositoryProvider).getAllCheckins();

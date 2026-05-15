@@ -61,4 +61,15 @@ class CheckinRepository {
     final now = DateTime.now();
     return '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
   }
+
+  Future<List<Map<String, dynamic>>> getAllCheckins() async {
+    final snapshot = await _firestore
+        .collection('users')
+        .doc(_userId)
+        .collection('checkins')
+        .orderBy('date')
+        .get();
+
+    return snapshot.docs.map((doc) => doc.data()).toList();
+  }
 }

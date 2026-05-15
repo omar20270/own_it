@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:own_it/core/theme/app_thema.dart';
 import 'package:own_it/features/checkin/presentation/pages/checkin_page.dart';
+import 'package:own_it/features/checkin/presentation/pages/history_screen.dart';
 import 'package:own_it/features/result/presentation/pages/result_page.dart';
 import 'package:own_it/firebase_options.dart';
 
@@ -29,7 +30,8 @@ class OwnItApp extends StatelessWidget {
       routes: {
         AppRoutes.setup: (_) => const SetupPage(),
         AppRoutes.checkin: (_) => const CheckinPage(),
-        AppRoutes.result: (_) => const ResultPage(), // add later
+        AppRoutes.result: (_) => const ResultPage(),
+        AppRoutes.history: (context) => const HistoryScreen(),
       },
     );
   }

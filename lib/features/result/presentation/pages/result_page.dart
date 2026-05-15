@@ -10,20 +10,64 @@ import '../widgets/result_card.dart';
 
 class ResultPage extends ConsumerWidget {
   const ResultPage({super.key});
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Get arguments passed from checkin page
-    final args =
-        ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+    final routeArgs = ModalRoute.of(context)?.settings.arguments;
 
-    final bool goalDone = args['goalDone'];
-    final bool habitAvoided = args['habitAvoided'];
-    final String goal = args['goal'];
-    final String habit = args['habit'];
+    if (routeArgs == null || routeArgs is! Map<String, dynamic>) {
+      return Scaffold(
+        backgroundColor: AppColors.background,
+        body: SafeArea(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text(
+                    'No result data found.',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'Please complete today’s check-in first.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pushNamedAndRemoveUntil(
+                        context,
+                        AppRoutes.checkin,
+                        (route) => false,
+                      );
+                    },
+                    child: const Text('Go to check-in'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
 
-    final allCheckinsAsync = ref.watch(allCheckinsProvider);
+    final args = routeArgs;
 
+    final bool goalDone = args['goalDone'] == true;
+    final bool habitAvoided = args['habitAvoided'] == true;
+    final String goal = args['goal']?.toString() ?? 'Your goal';
+    final String habit = args['habit']?.toString() ?? 'your habit';
+
+    final allCheckinsAsync = ref.watch(resultAllCheckinsProvider);
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -32,7 +76,6 @@ class ResultPage extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Title
               Text(
                 "Today's result",
                 style: Theme.of(context).textTheme.headlineMedium,
@@ -40,7 +83,6 @@ class ResultPage extends ConsumerWidget {
 
               const SizedBox(height: 24),
 
-              // Goal result card
               ResultCard(
                 label: goal,
                 message: goalDone
@@ -51,7 +93,6 @@ class ResultPage extends ConsumerWidget {
 
               const SizedBox(height: 12),
 
-              // Habit result card
               ResultCard(
                 label: '$habit habit',
                 message: habitAvoided
@@ -62,7 +103,6 @@ class ResultPage extends ConsumerWidget {
 
               const SizedBox(height: 20),
 
-              // Warning
               const Divider(color: AppColors.border),
               const SizedBox(height: 12),
               const Center(
@@ -80,7 +120,6 @@ class ResultPage extends ConsumerWidget {
               const Divider(color: AppColors.border),
               const SizedBox(height: 20),
 
-              // 21-day progress grid
               allCheckinsAsync.when(
                 loading: () => const Center(child: CircularProgressIndicator()),
                 error: (e, _) => Text('Error: $e'),
@@ -89,16 +128,14 @@ class ResultPage extends ConsumerWidget {
 
               const SizedBox(height: 40),
 
-              // Come back tomorrow button
               SizedBox(
                 width: double.infinity,
                 height: 52,
                 child: ElevatedButton(
                   onPressed: () {
-                    // Go back to check-in (or home)
                     Navigator.pushNamedAndRemoveUntil(
                       context,
-                      AppRoutes.checkin,
+                      AppRoutes.setup,
                       (route) => false,
                     );
                   },
