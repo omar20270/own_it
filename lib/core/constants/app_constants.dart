@@ -1,8 +1,8 @@
 class AppStrings {
   // Setup
-  static const setupTitle = 'OwnIt';
-  static const setupGoalQuestion = 'What are you working on?';
-  static const setupGoalSubtitle = 'Set your main goal';
+  static const setupTitle = 'FaceIt';
+  static const setupGoalQuestion = 'What will you face for 21 days?';
+  static const setupGoalSubtitle = 'One goal. One distraction. No excuses.';
   static const setupGoalHint = 'e.g. Finish Flutter tutorial';
   static const setupHabitQuestion = 'What distracts you most?';
   static const setupHabitSubtitle = 'Pick your bad habit';

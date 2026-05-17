@@ -133,11 +133,7 @@ class ResultPage extends ConsumerWidget {
                 height: 52,
                 child: ElevatedButton(
                   onPressed: () {
-                    Navigator.pushNamedAndRemoveUntil(
-                      context,
-                      AppRoutes.setup,
-                      (route) => false,
-                    );
+                    Navigator.pushNamed(context, AppRoutes.history);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
@@ -146,6 +142,26 @@ class ResultPage extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(14),
                     ),
                   ),
+                  child: const Text(
+                    'See my 21-day history',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
+              SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: OutlinedButton(
+                  onPressed: () {
+                    Navigator.pushNamedAndRemoveUntil(
+                      context,
+                      AppRoutes.checkin,
+                      (route) => false,
+                    );
+                  },
                   child: const Text(
                     'Come back tomorrow',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
