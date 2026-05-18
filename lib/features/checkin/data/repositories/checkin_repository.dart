@@ -9,20 +9,22 @@ class CheckinRepository {
     required bool goalDone,
     required bool habitAvoided,
   }) async {
-    final today = _todayKey();
-    final isHonest = goalDone && habitAvoided;
+    final now = DateTime.now();
 
-    await _firestore
+    final todayKey =
+        '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+
+    await FirebaseFirestore.instance
         .collection('users')
-        .doc(_userId)
+        .doc('user_001')
         .collection('checkins')
-        .doc(today)
+        .doc(todayKey)
         .set({
+          'date': todayKey,
           'goalDone': goalDone,
           'habitAvoided': habitAvoided,
-          'isHonest': isHonest,
-          'date': today,
-          'savedAt': FieldValue.serverTimestamp(),
+          'isHonest': true,
+          'createdAt': FieldValue.serverTimestamp(),
         });
   }
 

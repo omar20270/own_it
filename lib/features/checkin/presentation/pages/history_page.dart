@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:own_it/core/constants/app_constants.dart';
 import 'package:own_it/features/checkin/presentation/providers/checkin_providers.dart';
 
 class HistoryScreen extends ConsumerWidget {
   const HistoryScreen({super.key});
+
+  String _dateKey(DateTime date) {
+    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -35,11 +40,21 @@ class HistoryScreen extends ConsumerWidget {
     final distraction =
         setup?['badHabit'] ?? setup?['distraction'] ?? 'Your habit';
     //final distraction = setup?['distraction'] ?? 'Your habit';
-
     // Build a map of date -> checkin for quick lookup
     final checkinMap = <String, Map<String, dynamic>>{};
+
     for (final c in checkins) {
-      checkinMap[c['date'] as String] = c;
+      final rawDate = c['date'];
+
+      String dateKey;
+
+      if (rawDate is String) {
+        dateKey = rawDate.length >= 10 ? rawDate.substring(0, 10) : rawDate;
+      } else {
+        continue;
+      }
+
+      checkinMap[dateKey] = c;
     }
 
     // Generate all 21 days from start date
@@ -49,8 +64,8 @@ class HistoryScreen extends ConsumerWidget {
 
     final days = List.generate(21, (i) {
       final date = startDate.add(Duration(days: i));
-      final key =
-          '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+      final key = _dateKey(date);
+
       return {'date': key, 'checkin': checkinMap[key]};
     });
 
@@ -167,6 +182,40 @@ class HistoryScreen extends ConsumerWidget {
                     fontWeight: FontWeight.w800,
                     color: Color(0xFF26215C),
                     letterSpacing: -1,
+                  ),
+                ),
+
+                const SizedBox(height: 28),
+
+                SizedBox(
+                  width: double.infinity,
+                  height: 52,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.pushNamedAndRemoveUntil(
+                        context,
+                        AppRoutes.checkin,
+                        (route) => false,
+                      );
+                    },
+                    child: const Text('Back to today check-in'),
+                  ),
+                ),
+
+                const SizedBox(height: 12),
+
+                SizedBox(
+                  width: double.infinity,
+                  height: 52,
+                  child: OutlinedButton(
+                    onPressed: () {
+                      Navigator.pushNamedAndRemoveUntil(
+                        context,
+                        AppRoutes.setup,
+                        (route) => false,
+                      );
+                    },
+                    child: const Text('Start again'),
                   ),
                 ),
               ],
