@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:own_it/core/constants/app_constants.dart';
 import 'package:own_it/features/checkin/presentation/providers/checkin_providers.dart';
+import 'package:own_it/features/history/presentation/widgets/history_day_grid.dart';
+import 'package:own_it/features/history/presentation/widgets/history_stats_pills.dart';
 
-class HistoryScreen extends ConsumerWidget {
-  const HistoryScreen({super.key});
+class HistoryPage extends ConsumerWidget {
+  const HistoryPage({super.key});
 
   String _dateKey(DateTime date) {
     return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
@@ -110,25 +112,22 @@ class HistoryScreen extends ConsumerWidget {
             style: const TextStyle(fontSize: 13, color: Color(0xFF6F6B63)),
           ),
           const SizedBox(height: 10),
-          _buildDayGrid(days, isGoal: true),
+          HistoryDayGrid(days: days, isGoal: false),
           const SizedBox(height: 12),
-          _buildStatsPills([
-            (
-              '$goalDoneDays honest',
-              const Color(0xFFEAF3DE),
-              const Color(0xFF27500A),
-            ),
-            (
-              '$goalMissedDays missed',
-              const Color(0xFFFCEBEB),
-              const Color(0xFF791F1F),
-            ),
-            (
-              '$goalLeftDays left',
-              const Color(0xFFF1EFE8),
-              const Color(0xFF5F5E5A),
-            ),
-          ]),
+          HistoryStatsPills(
+            pills: [
+              (
+                '$habitCleanDays clean',
+                const Color(0xFFEAF3DE),
+                const Color(0xFF27500A),
+              ),
+              (
+                '$habitSlippedDays slipped',
+                const Color(0xFFFCEBEB),
+                const Color(0xFF791F1F),
+              ),
+            ],
+          ),
 
           const SizedBox(height: 28),
 
@@ -138,21 +137,28 @@ class HistoryScreen extends ConsumerWidget {
             style: const TextStyle(fontSize: 13, color: Color(0xFF6F6B63)),
           ),
           const SizedBox(height: 10),
-          _buildDayGrid(days, isGoal: false),
+          HistoryDayGrid(days: days, isGoal: true),
           const SizedBox(height: 12),
-          _buildStatsPills([
-            (
-              '$habitCleanDays clean',
-              const Color(0xFFEAF3DE),
-              const Color(0xFF27500A),
-            ),
-            (
-              '$habitSlippedDays slipped',
-              const Color(0xFFFCEBEB),
-              const Color(0xFF791F1F),
-            ),
-          ]),
 
+          HistoryStatsPills(
+            pills: [
+              (
+                '$goalDoneDays honest',
+                const Color(0xFFEAF3DE),
+                const Color(0xFF27500A),
+              ),
+              (
+                '$goalMissedDays missed',
+                const Color(0xFFFCEBEB),
+                const Color(0xFF791F1F),
+              ),
+              (
+                '$goalLeftDays left',
+                const Color(0xFFF1EFE8),
+                const Color(0xFF5F5E5A),
+              ),
+            ],
+          ),
           const SizedBox(height: 28),
 
           // Honesty score
@@ -223,64 +229,6 @@ class HistoryScreen extends ConsumerWidget {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildDayGrid(
-    List<Map<String, dynamic>> days, {
-    required bool isGoal,
-  }) {
-    return Wrap(
-      spacing: 6,
-      runSpacing: 6,
-      children: days.map((day) {
-        final checkin = day['checkin'] as Map<String, dynamic>?;
-        Color color;
-
-        if (checkin == null) {
-          color = const Color(0xFFD3D1C7); // future/unanswered
-        } else if (isGoal) {
-          color = checkin['goalDone'] == true
-              ? const Color(0xFF639922)
-              : const Color(0xFFE24B4A);
-        } else {
-          color = checkin['habitAvoided'] == true
-              ? const Color(0xFF639922)
-              : const Color(0xFFE24B4A);
-        }
-
-        return Container(
-          width: 28,
-          height: 28,
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(6),
-          ),
-        );
-      }).toList(),
-    );
-  }
-
-  Widget _buildStatsPills(List<(String, Color, Color)> pills) {
-    return Wrap(
-      spacing: 8,
-      children: pills.map((pill) {
-        return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          decoration: BoxDecoration(
-            color: pill.$2,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Text(
-            pill.$1,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: pill.$3,
-            ),
-          ),
-        );
-      }).toList(),
     );
   }
 }
