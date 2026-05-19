@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:own_it/core/constants/app_constants.dart';
-import 'package:own_it/features/checkin/presentation/providers/checkin_providers.dart';
+import 'package:own_it/features/history/presentation/providers/history_provider.dart';
 import 'package:own_it/features/history/presentation/widgets/history_day_grid.dart';
 import 'package:own_it/features/history/presentation/widgets/history_stats_pills.dart';
 
@@ -14,8 +14,8 @@ class HistoryPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final setupAsync = ref.watch(userSetupProvider);
-    final checkinsAsync = ref.watch(allCheckinsProvider);
+    final setupAsync = ref.watch(historyUserSetupProvider);
+    final checkinsAsync = ref.watch(historyAllCheckinsProvider);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8F7F3),
