@@ -13,10 +13,9 @@ final userSetupProvider = FutureProvider<Map<String, dynamic>?>((ref) async {
 });
 
 // Today's existing check-in (null if not answered yet)
-final todayCheckinProvider = FutureProvider<Map<String, dynamic>?>((ref) async {
+final todayCheckinProvider = FutureProvider<Checkin?>((ref) {
   return ref.read(checkinRepositoryProvider).getTodayCheckin();
 });
-
 // Honest days count
 final honestDaysProvider = FutureProvider<int>((ref) async {
   return ref.read(checkinRepositoryProvider).getHonestDaysCount();

@@ -14,11 +14,11 @@ class CheckinPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final setupAsync = ref.watch(userSetupProvider);
+    final todayCheckinAsync = ref.watch(todayCheckinProvider);
     final answers = ref.watch(checkinAnswersProvider);
     final honestDaysAsync = ref.watch(honestDaysProvider);
     final isSaving = ref.watch(checkinSavingProvider);
     final today = DateFormat('EEEE, MMM d').format(DateTime.now());
-
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -29,102 +29,199 @@ class CheckinPage extends ConsumerWidget {
             final goal = setup?['goal'] ?? 'your goal';
             final habit = setup?['badHabit'] ?? 'your habit';
 
-            return SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Date
-                  Text(
-                    today,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+            return todayCheckinAsync.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (e, _) => Center(child: Text('Error: $e')),
+              data: (todayCheckin) {
+                if (todayCheckin != null) {
+                  return _AlreadyCheckedInView(
+                    goal: goal,
+                    habit: habit,
+                    goalDone: todayCheckin.goalDone,
+                    habitAvoided: todayCheckin.habitAvoided,
+                  );
+                }
+
+                return SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 32,
                   ),
-                  const SizedBox(height: 6),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Date
+                      Text(
+                        today,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
 
-                  // Title
-                  Text(
-                    'Time to be honest.',
-                    style: Theme.of(context).textTheme.headlineMedium,
+                      // Title
+                      Text(
+                        'Time to be honest.',
+                        style: Theme.of(context).textTheme.headlineMedium,
+                      ),
+
+                      const SizedBox(height: 28),
+
+                      // Goal card
+                      CheckinCard(
+                        tag: 'Goal',
+                        question: 'Did you work on your $goal today?',
+                        selected: answers.goalDone,
+                        onSelected: (val) => ref
+                            .read(checkinAnswersProvider.notifier)
+                            .setGoalDone(val),
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      // Habit card
+                      CheckinCard(
+                        tag: 'Habit',
+                        question: 'Did you avoid $habit today?',
+                        selected: answers.habitAvoided,
+                        onSelected: (val) => ref
+                            .read(checkinAnswersProvider.notifier)
+                            .setHabitAvoided(val),
+                      ),
+
+                      const SizedBox(height: 24),
+
+                      // Streak counter
+                      honestDaysAsync.when(
+                        loading: () => const SizedBox.shrink(),
+                        error: (_, _) => const SizedBox.shrink(),
+                        data: (days) => _StreakBadge(days: days),
+                      ),
+
+                      const SizedBox(height: 32),
+
+                      // Submit button
+                      _SubmitButton(
+                        isEnabled: answers.isComplete && !isSaving,
+                        isSaving: isSaving,
+                        onPressed: () async {
+                          ref.read(checkinSavingProvider.notifier).state = true;
+                          try {
+                            await ref
+                                .read(checkinRepositoryProvider)
+                                .saveCheckin(
+                                  goalDone: answers.goalDone!,
+                                  habitAvoided: answers.habitAvoided!,
+                                );
+                            ref.invalidate(todayCheckinProvider);
+                            ref.invalidate(honestDaysProvider);
+                            ref.invalidate(allCheckinsProvider);
+                            if (context.mounted) {
+                              Navigator.pushNamed(
+                                context,
+                                AppRoutes.result,
+                                arguments: {
+                                  'goalDone': answers.goalDone,
+                                  'habitAvoided': answers.habitAvoided,
+                                  'goal': goal,
+                                  'habit': habit,
+                                },
+                              );
+                            }
+                          } catch (e) {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Error: $e')),
+                              );
+                            }
+                          } finally {
+                            ref.read(checkinSavingProvider.notifier).state =
+                                false;
+                          }
+                        },
+                      ),
+                    ],
                   ),
-
-                  const SizedBox(height: 28),
-
-                  // Goal card
-                  CheckinCard(
-                    tag: 'Goal',
-                    question: 'Did you work on your $goal today?',
-                    selected: answers.goalDone,
-                    onSelected: (val) => ref
-                        .read(checkinAnswersProvider.notifier)
-                        .setGoalDone(val),
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  // Habit card
-                  CheckinCard(
-                    tag: 'Habit',
-                    question: 'Did you avoid $habit today?',
-                    selected: answers.habitAvoided,
-                    onSelected: (val) => ref
-                        .read(checkinAnswersProvider.notifier)
-                        .setHabitAvoided(val),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Streak counter
-                  honestDaysAsync.when(
-                    loading: () => const SizedBox.shrink(),
-                    error: (_, _) => const SizedBox.shrink(),
-                    data: (days) => _StreakBadge(days: days),
-                  ),
-
-                  const SizedBox(height: 32),
-
-                  // Submit button
-                  _SubmitButton(
-                    isEnabled: answers.isComplete && !isSaving,
-                    isSaving: isSaving,
-                    onPressed: () async {
-                      ref.read(checkinSavingProvider.notifier).state = true;
-                      try {
-                        await ref
-                            .read(checkinRepositoryProvider)
-                            .saveCheckin(
-                              goalDone: answers.goalDone!,
-                              habitAvoided: answers.habitAvoided!,
-                            );
-                        if (context.mounted) {
-                          Navigator.pushNamed(
-                            context,
-                            AppRoutes.result,
-                            arguments: {
-                              'goalDone': answers.goalDone,
-                              'habitAvoided': answers.habitAvoided,
-                              'goal': goal,
-                              'habit': habit,
-                            },
-                          );
-                        }
-                      } catch (e) {
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(
-                            context,
-                          ).showSnackBar(SnackBar(content: Text('Error: $e')));
-                        }
-                      } finally {
-                        ref.read(checkinSavingProvider.notifier).state = false;
-                      }
-                    },
-                  ),
-                ],
-              ),
+                );
+              },
             );
           },
         ),
+      ),
+    );
+  }
+}
+
+class _AlreadyCheckedInView extends StatelessWidget {
+  final String goal;
+  final String habit;
+  final bool goalDone;
+  final bool habitAvoided;
+
+  const _AlreadyCheckedInView({
+    required this.goal,
+    required this.habit,
+    required this.goalDone,
+    required this.habitAvoided,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Text(
+            'You already checked in today.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 26,
+              fontWeight: FontWeight.w800,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 12),
+          const Text(
+            'Come back tomorrow for your next honest check-in.',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
+          ),
+          const SizedBox(height: 32),
+
+          SizedBox(
+            width: double.infinity,
+            height: 52,
+            child: ElevatedButton(
+              onPressed: () {
+                Navigator.pushNamed(
+                  context,
+                  AppRoutes.result,
+                  arguments: {
+                    'goalDone': goalDone,
+                    'habitAvoided': habitAvoided,
+                    'goal': goal,
+                    'habit': habit,
+                  },
+                );
+              },
+              child: const Text('View result'),
+            ),
+          ),
+
+          const SizedBox(height: 12),
+
+          SizedBox(
+            width: double.infinity,
+            height: 52,
+            child: OutlinedButton(
+              onPressed: () {
+                Navigator.pushNamed(context, AppRoutes.history);
+              },
+              child: const Text('View history'),
+            ),
+          ),
+        ],
       ),
     );
   }

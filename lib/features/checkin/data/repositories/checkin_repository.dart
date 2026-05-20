@@ -30,7 +30,7 @@ class CheckinRepository {
   }
 
   // Load today's check-in (if already answered)
-  Future<Map<String, dynamic>?> getTodayCheckin() async {
+  Future<Checkin?> getTodayCheckin() async {
     final doc = await _firestore
         .collection('users')
         .doc(_userId)
@@ -38,7 +38,11 @@ class CheckinRepository {
         .doc(_todayKey())
         .get();
 
-    return doc.exists ? doc.data() : null;
+    if (!doc.exists || doc.data() == null) {
+      return null;
+    }
+
+    return Checkin.fromMap(doc.data()!);
   }
 
   // Load user setup (goal + badHabit)
