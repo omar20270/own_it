@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:own_it/core/constants/app_constants.dart';
+import 'package:own_it/features/checkin/domain/entities/checkin.dart';
+import 'package:own_it/features/history/domain/history_stats.dart';
 import 'package:own_it/features/history/presentation/providers/history_provider.dart';
 import 'package:own_it/features/history/presentation/widgets/history_day_grid.dart';
 import 'package:own_it/features/history/presentation/widgets/history_stats_pills.dart';
@@ -26,7 +28,7 @@ class HistoryPage extends ConsumerWidget {
           data: (setup) => checkinsAsync.when(
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (e, _) => Center(child: Text('Error: $e')),
-            data: (checkins) => _buildContent(context, setup, checkins),
+            data: (checkins) => _buildContent(context, ref, setup, checkins),
           ),
         ),
       ),
@@ -35,27 +37,19 @@ class HistoryPage extends ConsumerWidget {
 
   Widget _buildContent(
     BuildContext context,
+    WidgetRef ref,
     Map<String, dynamic>? setup,
-    List<Map<String, dynamic>> checkins,
+    List<Checkin> checkins,
   ) {
     final goal = setup?['goal'] ?? 'Your goal';
     final distraction =
         setup?['badHabit'] ?? setup?['distraction'] ?? 'Your habit';
     //final distraction = setup?['distraction'] ?? 'Your habit';
     // Build a map of date -> checkin for quick lookup
-    final checkinMap = <String, Map<String, dynamic>>{};
+    final checkinMap = <String, Checkin>{};
 
     for (final c in checkins) {
-      final rawDate = c['date'];
-
-      String dateKey;
-
-      if (rawDate is String) {
-        dateKey = rawDate.length >= 10 ? rawDate.substring(0, 10) : rawDate;
-      } else {
-        continue;
-      }
-
+      final dateKey = c.date.length >= 10 ? c.date.substring(0, 10) : c.date;
       checkinMap[dateKey] = c;
     }
 
@@ -71,26 +65,12 @@ class HistoryPage extends ConsumerWidget {
       return {'date': key, 'checkin': checkinMap[key]};
     });
 
-    // Stats for goal
-    final goalDoneDays = checkins.where((c) => c['goalDone'] == true).length;
-    final goalMissedDays = checkins.where((c) => c['goalDone'] == false).length;
-    final goalLeftDays = 21 - checkins.length;
+    final visibleCheckins = days
+        .map((day) => day['checkin'])
+        .whereType<Checkin>()
+        .toList();
 
-    // Stats for habit
-    final habitCleanDays = checkins
-        .where((c) => c['habitAvoided'] == true)
-        .length;
-    final habitSlippedDays = checkins
-        .where((c) => c['habitAvoided'] == false)
-        .length;
-
-    // Honesty score
-    final answeredDays = checkins.length;
-    final honestDays = checkins.where((c) => c['isHonest'] == true).length;
-    final honestyScore = answeredDays == 0
-        ? 0
-        : ((honestDays / answeredDays) * 100).round();
-
+    final stats = HistoryStats.fromCheckins(visibleCheckins);
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -104,7 +84,19 @@ class HistoryPage extends ConsumerWidget {
               letterSpacing: -0.5,
             ),
           ),
+          Text(
+            'Visible checkins: ${visibleCheckins.length}',
+            style: const TextStyle(fontSize: 12, color: Colors.red),
+          ),
           const SizedBox(height: 24),
+          Text(
+            'Start date: ${_dateKey(startDate)}',
+            style: const TextStyle(fontSize: 12, color: Colors.red),
+          ),
+          Text(
+            'All checkins: ${checkins.map((c) => c.date).join(', ')}',
+            style: const TextStyle(fontSize: 12, color: Colors.red),
+          ),
 
           // Goal section
           Text(
@@ -112,19 +104,24 @@ class HistoryPage extends ConsumerWidget {
             style: const TextStyle(fontSize: 13, color: Color(0xFF6F6B63)),
           ),
           const SizedBox(height: 10),
-          HistoryDayGrid(days: days, isGoal: false),
+          HistoryDayGrid(days: days, isGoal: true),
           const SizedBox(height: 12),
           HistoryStatsPills(
             pills: [
               (
-                '$habitCleanDays clean',
+                '${stats.goalDoneDays} honest',
                 const Color(0xFFEAF3DE),
                 const Color(0xFF27500A),
               ),
               (
-                '$habitSlippedDays slipped',
+                '${stats.goalMissedDays} missed',
                 const Color(0xFFFCEBEB),
                 const Color(0xFF791F1F),
+              ),
+              (
+                '${stats.goalLeftDays} left',
+                const Color(0xFFF1EFE8),
+                const Color(0xFF5F5E5A),
               ),
             ],
           ),
@@ -137,25 +134,19 @@ class HistoryPage extends ConsumerWidget {
             style: const TextStyle(fontSize: 13, color: Color(0xFF6F6B63)),
           ),
           const SizedBox(height: 10),
-          HistoryDayGrid(days: days, isGoal: true),
+          HistoryDayGrid(days: days, isGoal: false),
           const SizedBox(height: 12),
-
           HistoryStatsPills(
             pills: [
               (
-                '$goalDoneDays honest',
+                '${stats.habitCleanDays} clean',
                 const Color(0xFFEAF3DE),
                 const Color(0xFF27500A),
               ),
               (
-                '$goalMissedDays missed',
+                '${stats.habitSlippedDays} slipped',
                 const Color(0xFFFCEBEB),
                 const Color(0xFF791F1F),
-              ),
-              (
-                '$goalLeftDays left',
-                const Color(0xFFF1EFE8),
-                const Color(0xFF5F5E5A),
               ),
             ],
           ),
@@ -182,7 +173,7 @@ class HistoryPage extends ConsumerWidget {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  '$honestyScore%',
+                  '${stats.honestyScore}%',
                   style: const TextStyle(
                     fontSize: 36,
                     fontWeight: FontWeight.w800,
@@ -214,12 +205,49 @@ class HistoryPage extends ConsumerWidget {
                   width: double.infinity,
                   height: 52,
                   child: OutlinedButton(
-                    onPressed: () {
-                      Navigator.pushNamedAndRemoveUntil(
-                        context,
-                        AppRoutes.setup,
-                        (route) => false,
+                    onPressed: () async {
+                      final shouldReset = await showDialog<bool>(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            title: const Text('Start again?'),
+                            content: const Text(
+                              'This will delete your current 21-day history and start a new challenge. This action cannot be undone.',
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context, false);
+                                },
+                                child: const Text('Cancel'),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context, true);
+                                },
+                                child: const Text('Delete and start again'),
+                              ),
+                            ],
+                          );
+                        },
                       );
+
+                      if (shouldReset != true) return;
+
+                      await ref
+                          .read(historyRepositoryProvider)
+                          .deleteAllCheckins();
+
+                      ref.invalidate(historyAllCheckinsProvider);
+                      ref.invalidate(historyUserSetupProvider);
+
+                      if (context.mounted) {
+                        Navigator.pushNamedAndRemoveUntil(
+                          context,
+                          AppRoutes.setup,
+                          (route) => false,
+                        );
+                      }
                     },
                     child: const Text('Start again'),
                   ),

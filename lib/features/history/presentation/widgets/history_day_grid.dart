@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:own_it/features/checkin/domain/entities/checkin.dart';
 
 class HistoryDayGrid extends StatelessWidget {
   final List<Map<String, dynamic>> days;
@@ -12,17 +13,18 @@ class HistoryDayGrid extends StatelessWidget {
       spacing: 6,
       runSpacing: 6,
       children: days.map((day) {
-        final checkin = day['checkin'] as Map<String, dynamic>?;
+        final checkin = day['checkin'] as Checkin?;
+
         Color color;
 
         if (checkin == null) {
           color = const Color(0xFFD3D1C7);
         } else if (isGoal) {
-          color = checkin['goalDone'] == true
+          color = checkin.goalDone
               ? const Color(0xFF639922)
               : const Color(0xFFE24B4A);
         } else {
-          color = checkin['habitAvoided'] == true
+          color = checkin.habitAvoided
               ? const Color(0xFF639922)
               : const Color(0xFFE24B4A);
         }

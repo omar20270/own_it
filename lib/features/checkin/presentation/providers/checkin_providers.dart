@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
+import 'package:own_it/features/checkin/domain/entities/checkin.dart';
 import '../../data/repositories/checkin_repository.dart';
 
 final checkinRepositoryProvider = Provider<CheckinRepository>((ref) {
@@ -58,8 +59,6 @@ final checkinAnswersProvider =
 // Saving state
 final checkinSavingProvider = StateProvider<bool>((ref) => false);
 // Provider that loads all 21 days of checkins
-final allCheckinsProvider = FutureProvider<List<Map<String, dynamic>>>((
-  ref,
-) async {
+final allCheckinsProvider = FutureProvider<List<Checkin>>((ref) async {
   return ref.read(checkinRepositoryProvider).getAllCheckins();
 });

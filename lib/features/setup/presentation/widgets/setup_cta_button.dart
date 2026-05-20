@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:own_it/core/constants/app_constants.dart';
 import 'package:own_it/core/theme/app_thema.dart';
+import 'package:own_it/features/checkin/presentation/providers/checkin_providers.dart';
+import 'package:own_it/features/history/presentation/providers/history_provider.dart';
 import 'package:own_it/features/setup/presentation/providers/setup_providers.dart';
 
 class SetupCtaButton extends ConsumerWidget {
@@ -19,6 +21,14 @@ class SetupCtaButton extends ConsumerWidget {
             goal: ref.read(goalProvider).trim(),
             badHabit: ref.read(selectedHabitProvider)!,
           );
+
+      ref.invalidate(userSetupProvider);
+      ref.invalidate(allCheckinsProvider);
+      ref.invalidate(historyUserSetupProvider);
+      ref.invalidate(historyAllCheckinsProvider);
+
+      ref.read(goalProvider.notifier).state = '';
+      ref.read(selectedHabitProvider.notifier).state = null;
 
       if (context.mounted) {
         Navigator.pushNamed(context, AppRoutes.checkin);

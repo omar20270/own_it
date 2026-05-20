@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:own_it/features/checkin/domain/entities/checkin.dart';
 
 class CheckinRepository {
   final _firestore = FirebaseFirestore.instance;
@@ -64,7 +65,7 @@ class CheckinRepository {
     return '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
   }
 
-  Future<List<Map<String, dynamic>>> getAllCheckins() async {
+  Future<List<Checkin>> getAllCheckins() async {
     final snapshot = await _firestore
         .collection('users')
         .doc(_userId)
@@ -72,6 +73,24 @@ class CheckinRepository {
         .orderBy('date')
         .get();
 
-    return snapshot.docs.map((doc) => doc.data()).toList();
+    return snapshot.docs.map((doc) {
+      return Checkin.fromMap(doc.data());
+    }).toList();
+  }
+
+  Future<void> deleteAllCheckins() async {
+    final snapshot = await _firestore
+        .collection('users')
+        .doc(_userId)
+        .collection('checkins')
+        .get();
+
+    final batch = _firestore.batch();
+
+    for (final doc in snapshot.docs) {
+      batch.delete(doc.reference);
+    }
+
+    await batch.commit();
   }
 }
