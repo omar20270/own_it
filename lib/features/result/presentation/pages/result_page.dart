@@ -52,6 +52,12 @@ class ResultPage extends ConsumerWidget {
                     },
                     child: const Text('Go to check-in'),
                   ),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/habits');
+                    },
+                    child: const Text('Open Daily Tracker'),
+                  ),
                 ],
               ),
             ),
@@ -150,6 +156,27 @@ class ResultPage extends ConsumerWidget {
               ),
 
               const SizedBox(height: 12),
+
+              SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/habits');
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                  child: const Text(
+                    'Open Daily Tracker',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                  ),
+                ),
+              ),
 
               SizedBox(
                 width: double.infinity,
