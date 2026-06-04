@@ -177,6 +177,12 @@ class ResultPage extends ConsumerWidget {
                   ),
                 ),
               ),
+              OutlinedButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, AppRoutes.supportHabits);
+                },
+                child: const Text('Open Support Habits'),
+              ),
 
               SizedBox(
                 width: double.infinity,

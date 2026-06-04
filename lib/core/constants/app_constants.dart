@@ -35,4 +35,5 @@ class AppRoutes {
   static const checkin = '/checkin';
   static const result = '/result';
   static const history = '/history';
+  static const String supportHabits = '/support-habits';
 }
