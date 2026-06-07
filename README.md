@@ -15,6 +15,15 @@ Every day, the user checks whether they completed their goal and avoided their d
 - Firebase Firestore integration
 - Clean Flutter UI
 - Riverpod state management
+- ## Current Features
+
+- Daily check-in with main goal and bad habit tracking
+- Custom support habits
+- Add, edit, delete and toggle habits
+- Daily score calculation
+- 21-day and yearly progress calculation logic
+- Riverpod state management
+- Unit-tested progress calculation
 
 ## Screenshots
 
